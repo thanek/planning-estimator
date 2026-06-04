@@ -305,9 +305,15 @@ details[open] summary::before { content: "▾ "; }
   margin-left: auto;
 }
 .vote-summary-item.pie-highlighted {
-  background: var(--green-bg);
-  border-color: var(--green-border);
+  background: var(--card-hover);
+  border-color: var(--border-strong);
   transform: translateX(4px);
+}
+.vote-summary-item.pie-selected {
+  background: var(--primary-tint);
+  border-color: var(--primary-glow);
+  box-shadow: 0 0 0 1px var(--primary-glow);
+  transform: translateX(6px);
 }
 .legend-dot {
   width: 12px;
