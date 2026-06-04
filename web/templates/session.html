@@ -218,6 +218,7 @@
     return `rgb(${r},${g},${b})`;
   }
 
+
   function renderPieChart() {
     const svg = document.getElementById("vote-pie-chart");
     const list = document.getElementById("vote-summary-list");
@@ -273,7 +274,6 @@
     const g = document.createElementNS(SVG_NS, "g");
     g.setAttribute("filter", "url(#pie-shadow)");
 
-    const slicesData = [];
     let selectedPath = null;
     let selectedListItem = null;
     function selectItem(path, listItem, dx, dy, voters, estimate) {
@@ -295,6 +295,15 @@
       }
       hidePopover();
     }
+    function bindClick(svgEl, listItem, anchor, dx, dy, voters, estimate) {
+      function handler(e) {
+        e.stopPropagation();
+        if (selectedListItem === listItem) deselectAll();
+        else selectItem(anchor, listItem, dx, dy, voters, estimate);
+      }
+      svgEl.addEventListener("click", handler);
+      listItem.addEventListener("click", handler);
+    }
     if (counts.filter(c => c > 0).length === 1) {
       const idx = counts.findIndex(c => c > 0);
       const color = PIE_COLORS[idx % PIE_COLORS.length];
@@ -307,16 +316,7 @@
       svg.appendChild(g);
       addReflection(svg, SVG_NS, cx, cy, r);
       const listItem = items[idx];
-      circle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (selectedListItem === listItem) deselectAll();
-        else selectItem(circle, listItem, 0, 0, [], items[idx].dataset.estimate);
-      });
-      listItem.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (selectedListItem === listItem) deselectAll();
-        else selectItem(circle, listItem, 0, 0, [], items[idx].dataset.estimate);
-      });
+      bindClick(circle, listItem, circle, 0, 0, [], items[idx].dataset.estimate);
       return;
     }
     let angle = -Math.PI / 2;
@@ -341,6 +341,7 @@
       const dx = Math.cos(midAngle) * 10;
       const dy = Math.sin(midAngle) * 10;
       const listItem = items[i];
+      path._index = i;
       const voters = (listItem.dataset.voters || "").split(",").filter(Boolean);
       const estimate = listItem.dataset.estimate;
       function activate() {
@@ -354,7 +355,7 @@
         path.style.transform = "";
         listItem.classList.remove("pie-highlighted");
         if (selectedPath) {
-          const selIdx = slicesData.findIndex(s => s.path === selectedPath);
+          const selIdx = selectedPath._index;
           if (selIdx >= 0) {
             const selItem = items[selIdx];
             const selVoters = (selItem.dataset.voters || "").split(",").filter(Boolean);
@@ -364,16 +365,7 @@
           hidePopover();
         }
       }
-      path.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (selectedPath === path) deselectAll();
-        else selectItem(path, listItem, dx, dy, voters, estimate);
-      });
-      listItem.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (selectedListItem === listItem) deselectAll();
-        else selectItem(path, listItem, dx, dy, voters, estimate);
-      });
+      bindClick(path, listItem, path, dx, dy, voters, estimate);
       path.addEventListener("mouseenter", activate);
       path.addEventListener("mouseleave", deactivate);
       listItem.addEventListener("mouseenter", activate);
@@ -382,13 +374,12 @@
       title.textContent = `${items[i].dataset.estimate}: ${count} (${Math.round(count / total * 100)}%)`;
       path.appendChild(title);
       g.appendChild(path);
-      slicesData.push({ path, midAngle });
       angle += slice;
     });
     svg.appendChild(g);
     addReflection(svg, SVG_NS, cx, cy, r);
-    document.addEventListener("click", () => deselectAll());
   }
+  document.addEventListener("click", () => deselectAll());
 
   function addReflection(svg, SVG_NS, cx, cy, r) {
     const shine = document.createElementNS(SVG_NS, "ellipse");
