@@ -62,14 +62,12 @@
   (function () {
     const proto = location.protocol === "https:" ? "wss" : "ws";
     let navigating = false;
-
     document.querySelector('form[action="/sessions"]').addEventListener('submit', () => {
       navigating = true;
     });
     document.querySelectorAll('.session-row').forEach(row => {
       row.addEventListener('click', () => { navigating = true; });
     });
-
     function connect() {
       const ws = new WebSocket(`${proto}://${location.host}/ws/home`);
       ws.onmessage = (e) => {
@@ -80,6 +78,9 @@
       ws.onclose = () => { if (!navigating) setTimeout(connect, 3000); };
     }
     connect();
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") location.reload();
+    });
   })();
 </script>
 {% endblock %}

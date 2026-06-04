@@ -143,6 +143,9 @@
   };
 
   ws.onclose = () => setTimeout(() => location.reload(), 3000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") location.reload();
+  });
 
   function updateParticipants(data) {
     document.getElementById("session-title").textContent = data.title;

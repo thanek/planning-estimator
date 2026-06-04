@@ -131,7 +131,7 @@ async def test_home_without_cookie_redirects_to_login(client):
 async def test_home_with_cookie_renders(authed_client):
     r = await authed_client.get("/")
     assert r.status_code == 200
-    assert "Planning Estimator" in r.text
+    assert "Plannie" in r.text
 
 
 # ── Session creation ──────────────────────────────────────────────────────────
