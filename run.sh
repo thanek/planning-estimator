@@ -74,7 +74,9 @@ cmd_test() {
     ensure_deps
     info "Running tests..."
     echo ""
-    python -m pytest tests/ -v "$@"
+    "$VENV_DIR/bin/python" -m pytest tests/ -v "$@"
+with:
+    "$VENV_DIR/bin/python" -m pytest tests/ -v "$@"
 }
 
 # ── Help ──────────────────────────────────────────────────────────────────────
